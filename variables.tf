@@ -1,20 +1,27 @@
-variable "example_of_required_variable" {
-  type        = string
-  description = "Short description of the variable"
+variable "tags" {
+  description = "Tag that will be added to resources in the module that support it"
+  default     = {}
+  type        = map(string)
 }
 
-variable "example_of_variable_with_default_value" {
+variable "zone_name" {
+  description = "DNS name of the zone (e.g. exemple.com)."
+  default     = null
   type        = string
-  description = "Short description of the variable"
-  default     = "default_value"
 }
 
-variable "example_with_validation" {
-  type        = list(string)
-  description = "Short description of the variable"
+variable "certificate" {
+  description = "Certificate to be created for the zone. Domain and sans should end with a \".\" and exclude the zone name."
+  default     = null
+  type        = object({
+    enabled                   = bool
+    domain_name               = string
+    subject_alternative_names = list(string)
+  })
+}
 
-  validation {
-    condition     = length(var.example_with_validation) >= 2
-    error_message = "Error message which explains what's required and finished with a dot ."
-  }
+variable "delegations" {
+  description = "Map { <sub_zone> => [<name_servers>] in order to setup delegations. For <sub_zones> just put the sub domain."
+  default     = {}
+  type        = map(list(string))
 }
