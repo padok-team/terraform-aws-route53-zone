@@ -35,8 +35,8 @@ resource "aws_route53_record" "delegation" {
 resource "aws_acm_certificate" "this" {
   count = var.certificate["enabled"] ? 1 : 0
 
-  domain_name               = join(".", [var.certificate["domain_name"], var.zone_name])
-  subject_alternative_names = [for sans in var.certificate["subject_alternative_names"]: join(".", [sans, var.zone_name])]
+  domain_name               = join("", [var.certificate["domain_name"], var.zone_name])
+  subject_alternative_names = [for sans in var.certificate["subject_alternative_names"]: join("", [sans, var.zone_name])]
 
   validation_method = "DNS"
 

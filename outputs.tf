@@ -10,8 +10,8 @@ output "zone" {
 
 output "certificate_arn" {
   description = "Objects describing the certificate with: arn and domain_name"
-  value = {
+  value = length(aws_acm_certificate.this) != 0 ? {
     arn         = aws_acm_certificate.this[0].arn
     domain_name = aws_acm_certificate.this[0].domain_name
-  }
+  } : null
 }

@@ -8,14 +8,14 @@ provider "aws" {
 module "zone_app_front" {
   source = "../.."
 
-  zone_name = "exemple.com"
+  zone_name = "libtime-ex-appfront.forge-demo.fr"
 
   certificate = {
     enabled = true
 
     domain_name = "www."
     subject_alternative_names = [
-        "."
+        ""
     ]
   }
 }

@@ -3,12 +3,13 @@
 # Note: Certificate should stay disabled until shou have performed zone delegation
 
 provider "aws" {
+  region = "eu-west-3"
 }
 
 module "zone_app" {
   source = "../.."
 
-  zone_name = "exemple.com"
+  zone_name = "libtime-ex-wildcard.forge-demo.fr"
 
   certificate = {
     enabled = true
