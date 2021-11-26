@@ -1,6 +1,6 @@
 # Zone with a wildcard certificate *.exemple.com
 #
-# Note: Certificate should stay disabled until shou have performed zone delegation
+# Note: Certificate should stay disabled until you have performed zone delegation
 
 provider "aws" {
   region = "eu-west-3"
@@ -12,7 +12,7 @@ module "zone_app" {
   zone_name = "example.com"
 
   certificate = {
-    enabled = false
+    enabled = true
 
     domain_name = "*."
     subject_alternative_names = []

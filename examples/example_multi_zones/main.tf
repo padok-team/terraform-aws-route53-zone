@@ -1,6 +1,6 @@
 # Zone with a wildcard certificate *.exemple.com
 #
-# Note: Certificate should stay disabled until shou have performed zone delegation
+# Note: Certificate should stay disabled until you have performed zone delegation
 
 provider "aws" {
   profile = ""
