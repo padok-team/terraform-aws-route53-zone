@@ -8,7 +8,7 @@ provider "aws" {
 module "zone_app_front" {
   source = "../.."
 
-  zone_name = "libtime-ex-appfront.forge-demo.fr"
+  zone_name = "example.com"
 
   certificate = {
     enabled = false

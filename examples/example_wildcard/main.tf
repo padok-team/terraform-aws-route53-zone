@@ -9,7 +9,7 @@ provider "aws" {
 module "zone_app" {
   source = "../.."
 
-  zone_name = "libtime-ex-wildcard.forge-demo.fr"
+  zone_name = "example.com"
 
   certificate = {
     enabled = false

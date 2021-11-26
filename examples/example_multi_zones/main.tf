@@ -17,7 +17,7 @@ provider "aws" {
 module "zone_root" {
   source = "../.."
 
-  zone_name = "libtime-ex-root.forge-demo.fr"
+  zone_name = "example.com"
 
   certificate = {
     enabled = false
