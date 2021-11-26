@@ -11,7 +11,7 @@ module "zone_app_front" {
   zone_name = "libtime-ex-appfront.forge-demo.fr"
 
   certificate = {
-    enabled = true
+    enabled = false
 
     domain_name = "www."
     subject_alternative_names = [

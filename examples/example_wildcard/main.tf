@@ -12,7 +12,7 @@ module "zone_app" {
   zone_name = "libtime-ex-wildcard.forge-demo.fr"
 
   certificate = {
-    enabled = true
+    enabled = false
 
     domain_name = "*."
     subject_alternative_names = []
