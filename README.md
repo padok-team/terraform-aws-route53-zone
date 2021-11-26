@@ -27,6 +27,10 @@ module "example" {
 }
 ```
 
+## Schema
+
+![Schema DNS](./img/schema.png)
+
 ## Examples
 
 - [Example with one zone and certificate with 2 sans](examples/example_app_front/main.tf)
