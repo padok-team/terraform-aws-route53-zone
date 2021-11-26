@@ -1,6 +1,6 @@
 # CLOUD_PROVIDER TYPE Terraform module
 
-Terraform module which creates **Rout53 zones** and **ACM Certificates** resources on **AWS**. This module is an abstraction.
+Terraform module which creates **Route53 zones** and **ACM Certificates** resources on **AWS**.
 
 ## User Stories for this module
 
@@ -8,7 +8,6 @@ Terraform module which creates **Rout53 zones** and **ACM Certificates** resourc
 - AAOps I can add record to the zone
 - AAOps I can add delegation record to the zone
 - AAOps I can create a certificate for the zone
-- ...
 
 ## Usage
 
@@ -33,7 +32,7 @@ module "example" {
 
 ## Examples
 
-- [Example with one zone and certificate with 2 sans](examples/example_app_front/main.tf)
+- [Example with one zone and certificate with 2 Subject Alternative Names (SAN)](examples/example_app_front/main.tf)
 - [Example with one zone and a wildcard certificate](examples/example_wildcard/main.tf)
 - [Example with 1 root zone and 2 sub zones](examples/example_multi_zones/main.tf)
 
