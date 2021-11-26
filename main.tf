@@ -1,10 +1,3 @@
-# Here you can reference 2 type of terraform objects :
-# 1. Ressources from you provider of choice
-# 2. Modules from official repositories which include modules from the following github organizations
-#     - AWS: https://github.com/terraform-aws-modules
-#     - GCP: https://github.com/terraform-google-modules
-#     - Azure: https://github.com/Azure
-
 # Create
 #  - 1 Route53 zone
 #  - 1 ACM certificate, with DNS validation, if enabled
@@ -12,8 +5,8 @@
 # ====================[ Route53 zone ] ======================
 
 resource "aws_route53_zone" "this" {
-  name    = var.zone_name
-  tags    = var.tags
+  name = var.zone_name
+  tags = var.tags
 }
 
 # ====================[ Route53 zone delegation ] ===========
@@ -21,8 +14,8 @@ resource "aws_route53_zone" "this" {
 resource "aws_route53_record" "delegation" {
   for_each = var.delegations
 
-  zone_id  = aws_route53_zone.this.zone_id
-  name     = each.key
+  zone_id = aws_route53_zone.this.zone_id
+  name    = each.key
 
   type = "NS"
   ttl  = "300"
@@ -36,7 +29,7 @@ resource "aws_acm_certificate" "this" {
   count = var.certificate["enabled"] ? 1 : 0
 
   domain_name               = join("", [var.certificate["domain_name"], var.zone_name])
-  subject_alternative_names = [for sans in var.certificate["subject_alternative_names"]: join("", [sans, var.zone_name])]
+  subject_alternative_names = [for sans in var.certificate["subject_alternative_names"] : join("", [sans, var.zone_name])]
 
   validation_method = "DNS"
 

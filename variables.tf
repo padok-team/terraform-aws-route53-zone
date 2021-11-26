@@ -13,7 +13,7 @@ variable "zone_name" {
 variable "certificate" {
   description = "Certificate to be created for the zone. Domain and sans should end with a \".\" and exclude the zone name."
   default     = null
-  type        = object({
+  type = object({
     enabled                   = bool
     domain_name               = string
     subject_alternative_names = list(string)
