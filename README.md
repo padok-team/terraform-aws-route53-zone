@@ -14,7 +14,7 @@ Terraform module which creates **Rout53 zones** and **ACM Certificates** resourc
 
 ```hcl
 module "example" {
-  source = "https://github.com/padok-team/terraform-aws-zoute53-zone"
+  source = "git@github.com:padok-team/terraform-aws-zoute53-zone"
 
   zone_name = "exemple.com"
 
@@ -42,9 +42,10 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
-| <a name="input_certificate"></a> [certificate](#input\_certificate) | Certificate to be created for the zone. Domain and sans should end with a "." and exclude the zone name | <pre>object({<br>    enabled                   = bool<br>    domain_name               = string<br>    subject_alternative_names = list(string)<br>  })</pre> | `null` | no |
-| <a name="input_records"></a> [records](#input\_records) | Records to be created with the zone. Note that the input is conform with AWS records export from Route53 | <pre>map(object({<br>      Name = string<br>      Type = string<br>      TTL  = optional(number)<br><br>      ResourceRecords = optional(list(object({<br>          Value = string<br>      })))<br><br>      AliasTarget = optional(object({<br>          HostedZoneId         = string<br>          DNSName              = string<br>          EvaluateTargetHealth = bool<br>      }))<br>  }))</pre> | `[]` | no |
-| <a name="input_zone_name"></a> [zone\_name](#input\_zone\_name) | DNS name of the zone (e.g. exemple.com) | `string` | `null` | no |
+| <a name="input_certificate"></a> [certificate](#input\_certificate) | Certificate to be created for the zone. Domain and sans should end with a "." and exclude the zone name. | <pre>object({<br>    enabled                   = bool<br>    domain_name               = string<br>    subject_alternative_names = list(string)<br>  })</pre> | `null` | no |
+| <a name="input_delegations"></a> [delegations](#input\_delegations) | Map { <sub\_zone> => [<name\_servers>] in order to setup delegations. For <sub\_zones> just put the sub domain. | `map(list(string))` | `{}` | no |
+| <a name="input_tags"></a> [tags](#input\_tags) | Tag that will be added to resources in the module that support it | `map(string)` | `{}` | no |
+| <a name="input_zone_name"></a> [zone\_name](#input\_zone\_name) | DNS name of the zone (e.g. exemple.com). | `string` | `null` | no |
 
 ## Outputs
 
