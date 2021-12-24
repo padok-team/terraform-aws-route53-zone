@@ -11,7 +11,7 @@ variable "zone_name" {
 }
 
 variable "certificate" {
-  description = "Certificate to be created for the zone. Domain and sans should end with a \".\" and exclude the zone name."
+  description = "Certificate to be created for the zone. Domain and Subject Alternative Names (SAN) should end with a \".\" and exclude the zone name."
   default     = null
   type        = object({
     enabled                   = bool
