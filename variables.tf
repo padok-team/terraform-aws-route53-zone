@@ -4,19 +4,23 @@ variable "tags" {
   type        = map(string)
 }
 
-variable "zone_name" {
+variable "zone" {
   description = "DNS name of the zone (e.g. exemple.com)."
   default     = null
-  type        = string
+  type = object({
+    create      = optional(bool)
+    name        = string
+  })
 }
 
 variable "certificate" {
   description = "Certificate to be created for the zone. Domain and sans should end with a \".\" and exclude the zone name."
   default     = null
   type = object({
-    enabled                   = bool
+    enabled                   = optional(bool)
+    enabled_clone             = optional(bool)
     domain_name               = string
-    subject_alternative_names = list(string)
+    subject_alternative_names = optional(list(string))
   })
 }
 

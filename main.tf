@@ -2,11 +2,38 @@
 #  - 1 Route53 zone
 #  - 1 ACM certificate, with DNS validation, if enabled
 
+
+# ====================[ Default Certificate ] ===============
+
+locals {
+  certificate = defaults (
+    var.certificate,
+    {
+      enabled       = false
+      enabled_clone = false
+
+      domain_name = ""
+      # subject_alternative_names = 
+  })
+
+  zone_internal = var.zone["create"] ? aws_route53_zone.this[0] : data.aws_route53_zone.this[0]
+}
+
 # ====================[ Route53 zone ] ======================
 
 resource "aws_route53_zone" "this" {
-  name = var.zone_name
+  count = var.zone["create"] ? 1 : 0
+
+  name = var.zone["name"]
   tags = var.tags
+}
+
+# Use data source only when we do not want to create the zone, but reuse another one
+data "aws_route53_zone" "this" {
+  count = var.zone["create"] ? 0 : 1
+
+  name         = var.zone["name"]
+  private_zone = false
 }
 
 # ====================[ Route53 zone delegation ] ===========
@@ -14,7 +41,7 @@ resource "aws_route53_zone" "this" {
 resource "aws_route53_record" "delegation" {
   for_each = var.delegations
 
-  zone_id = aws_route53_zone.this.zone_id
+  zone_id = local.zone_internal.zone_id
   name    = each.key
 
   type = "NS"
@@ -23,46 +50,36 @@ resource "aws_route53_record" "delegation" {
   records = each.value
 }
 
-# ====================[ Certificate ] =======================
+# ====================[ Certificates ] =======================
 
-resource "aws_acm_certificate" "this" {
-  count = var.certificate["enabled"] ? 1 : 0
-
-  domain_name               = join("", [var.certificate["domain_name"], var.zone_name])
-  subject_alternative_names = [for sans in var.certificate["subject_alternative_names"] : join("", [sans, var.zone_name])]
-
-  validation_method = "DNS"
+module "certificate" {
+  count  = local.certificate["enabled"] ? 1 : 0
+  source = "./modules/terraform-aws-certificate"
 
   tags = var.tags
 
-  lifecycle {
-    create_before_destroy = true
+  certificate = local.certificate
+  zone        = {
+    name = local.zone_internal.name
+    id   = local.zone_internal.zone_id
   }
 }
 
-# Note: dvo = domain validation option
-resource "aws_route53_record" "validation" {
-  for_each = length(aws_acm_certificate.this) == 0 ? {} : {
-    for dvo in aws_acm_certificate.this[0].domain_validation_options : dvo.domain_name => {
-      name   = dvo.resource_record_name
-      record = dvo.resource_record_value
-      type   = dvo.resource_record_type
-    }
+# Create a clone using another provider if required
+#  => Useful for example for CloudFront that require a certificate in us-east-1
+module "certificate_clone" {
+  count    = local.certificate["enabled_clone"] ? 1 : 0
+  source = "./modules/terraform-aws-certificate"
+
+  tags = var.tags
+
+  providers = {
+    aws = aws.clone
   }
 
-  zone_id = aws_route53_zone.this.zone_id
-
-  name    = each.value.name
-  records = [each.value.record]
-  type    = each.value.type
-
-  allow_overwrite = true
-  ttl             = 60
-}
-
-resource "aws_acm_certificate_validation" "this" {
-  count = var.certificate["enabled"] ? 1 : 0
-
-  certificate_arn         = aws_acm_certificate.this[0].arn
-  validation_record_fqdns = [for record in aws_route53_record.validation : record.fqdn]
+  certificate = local.certificate
+  zone        = {
+    name = local.zone_internal.name
+    id   = local.zone_internal.zone_id
+  }
 }

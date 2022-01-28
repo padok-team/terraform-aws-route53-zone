@@ -5,9 +5,6 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = ">= 3.63"
-      configuration_aliases = [ aws.clone ]
     }
   }
-
-  experiments = [module_variable_optional_attrs]
 }
