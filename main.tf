@@ -15,9 +15,8 @@ locals {
       domain_name = ""
       # subject_alternative_names = 
   })
-
-  zone_internal = var.zone["create"] ? aws_route53_zone.this[0] : data.aws_route53_zone.this[0]
 }
+
 
 # ====================[ Route53 zone ] ======================
 
@@ -36,6 +35,11 @@ data "aws_route53_zone" "this" {
   private_zone = false
 }
 
+locals {
+  zone_internal = var.zone["create"] ? aws_route53_zone.this[0] : data.aws_route53_zone.this[0]
+}
+
+
 # ====================[ Route53 zone delegation ] ===========
 
 resource "aws_route53_record" "delegation" {
@@ -50,10 +54,12 @@ resource "aws_route53_record" "delegation" {
   records = each.value
 }
 
+
 # ====================[ Certificates ] =======================
 
 module "certificate" {
   count  = local.certificate["enabled"] ? 1 : 0
+
   source = "./modules/terraform-aws-certificate"
 
   tags = var.tags
@@ -69,13 +75,14 @@ module "certificate" {
 #  => Useful for example for CloudFront that require a certificate in us-east-1
 module "certificate_clone" {
   count    = local.certificate["enabled_clone"] ? 1 : 0
-  source = "./modules/terraform-aws-certificate"
 
-  tags = var.tags
+  source = "./modules/terraform-aws-certificate"
 
   providers = {
     aws = aws.clone
   }
+
+  tags = var.tags
 
   certificate = local.certificate
   zone        = {

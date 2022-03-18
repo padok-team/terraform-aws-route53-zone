@@ -14,84 +14,122 @@
 #
 # Note: Certificate should stay disabled until you have performed zone delegation
 
+# These example will use your local credentials + Paris region
 provider "aws" {
-  profile = ""
-  region  = "eu-west-2"
-  default_tags {
-    tags = {
-      Environment = "Organization"
-      Layer       = "Organization"
-      Owner       = "Padok"
-    }
-  }
+  region = "eu-west-3"
+}
+provider "aws" {
+  alias  = "clone"
+  region = "us-east-1"
 }
 
-provider "aws" {
-  alias = "east"
-  profile = ""
-  region  = "eu-east-1"
-  default_tags {
-    tags = {
-      Environment = "Organization"
-      Layer       = "Organization"
-      Owner       = "Padok"
-    }
-  }
-}
-
+# Setup a root domain + a child domain
 locals {
-  domain = "libtime.forge-demo.fr"
-  domains_childs = {
-    for env in ["staging", "production"]:
-      env => format("%s.%s", "staging", module.zone_root.zone["name"])
+  domain_root = "libtime.forge-demo.fr"
+  domains = {
+    for env in ["zone-staging", "zone-preproduction", "zone-production"]:
+      env => format("%s.%s", env, module.zone_root.zone["name"])
     }
 }
 
-# Create NS record to catch another zone
-
+# Create a certificate for the root zone
+#  - Will not change anything in the root zone config
+#    Because it does not belong to this Terraform context,
+#    But it can add NS records to the zone to perform zone delegation
 module "zone_root" {
   source = "../.."
 
-  zone_name = local.domain
+  providers = {
+    aws       = aws
+    aws.clone = aws
+  }
+
+  zone = {
+    create = false
+    name   = local.domain_root
+  }
 
   certificate = {
     enabled = false
+
+    domain_name = ""
   }
 
   delegations = {
-    "staging" = module.zone_staging.zone.name_servers
-    "preprod" = module.zone_preprod.zone.name_servers
+    "zone-staging"       = module.zone_staging.zone.name_servers
+    "zone-preproduction" = module.zone_preproduction.zone.name_servers
+    "zone-production"    = module.zone_production.zone.name_servers
   }
 }
 
+# Create a zone
+#  - With delegation from the root zone above
+#  - With certificate with wildcard + zone apex SANs
+#  - Without cloned certificate
 module "zone_staging" {
   source = "../.."
 
   providers = {
     aws       = aws
-    aws.clone = aws.east
+    aws.clone = aws.clone
   }
 
-  zone_name = local.domains_childs["staging"]
+  zone = {
+    create = true
+    name   = local.domains["zone-staging"]
+  }
 
   certificate = {
     enabled       = true
-    enabled_clone = true
+    enabled_clone = false
 
     domain_name = ""
     subject_alternative_names = ["*."]
   }
 }
 
+# Create a zone
+#  - With delegation from the root zone above
+#  - With certificate with wildcard + zone apex SANs
+#  - Without cloned certificate
+module "zone_preproduction" {
+  source = "../.."
+
+  providers = {
+    aws       = aws
+    aws.clone = aws.clone
+  }
+
+  zone = {
+    create = true
+    name   = local.domains["zone-preproduction"]
+  }
+
+  certificate = {
+    enabled       = true
+    enabled_clone = false
+
+    domain_name = ""
+    subject_alternative_names = ["*."]
+  }
+}
+
+# Create a zone
+#  - With delegation from the root zone above
+#  - With certificate with wildcard + zone apex SANs
+#  - With a cloned certificate in us-east-1 
 module "zone_production" {
   source = "../.."
 
   providers = {
     aws       = aws
-    aws.clone = aws.east
+    aws.clone = aws.clone
   }
 
-  zone_name = local.domains_childs["production"]
+  zone = {
+    create = true
+    name   = local.domains["zone-production"]
+  }
 
   certificate = {
     enabled       = true
@@ -101,27 +139,3 @@ module "zone_production" {
     subject_alternative_names = ["*."]
   }
 }
-
-
-# module "zone_root" {}
-
-# module "zone_staging" {
-#   depends_on = [module.zone_root]
-# }
-# module "zone_delegate_root_staging" {
-#   depends_on = [module.zone_staging]
-# }
-# module "certificate_staging" {
-#   depends_on = [module.zone_delegate_root_staging]
-# }
-
-
-# module "zone_production" {
-#   depends_on = [module.zone_root]
-# }
-# module "zone_delegate_root_production" {
-#   depends_on = [module.zone_production]
-# }
-# module "certificate_production" {
-#   depends_on = [module.zone_delegate_root_production]
-# }
