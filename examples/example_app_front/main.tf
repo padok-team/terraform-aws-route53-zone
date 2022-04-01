@@ -13,8 +13,8 @@ provider "aws" {
 
 # Setup a root domain + a child domain
 locals {
-  domain_root = "libtime.forge-demo.fr"
-  domain = format("zone-app-front.%s", local.domain_root)
+  domain_root = "libtime.XXX.fr"
+  domain      = format("zone-app-front.%s", local.domain_root)
 }
 
 # Create a certificate for the root zone
@@ -51,7 +51,7 @@ module "zone_libtime" {
 # Create a zone
 #  - With delegation from the root zone above
 #  - With certificate with www. + zone apex SANs
-#  - With a cloned certificate in us-east-1 
+#  - With a cloned certificate in us-east-1
 module "zone_app_front" {
   source = "../.."
 
@@ -71,7 +71,7 @@ module "zone_app_front" {
 
     domain_name = "www."
     subject_alternative_names = [
-        ""
+      ""
     ]
   }
 }

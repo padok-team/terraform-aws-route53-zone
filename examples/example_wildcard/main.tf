@@ -16,8 +16,8 @@ provider "aws" {
 
 # Setup a root domain + a child domain
 locals {
-  domain_root = "libtime.forge-demo.fr"
-  domain = format("zone-app.%s", local.domain_root)
+  domain_root = "libtime.XXX.fr"
+  domain      = format("zone-app.%s", local.domain_root)
 }
 
 # Create a certificate for the root zone
@@ -51,7 +51,7 @@ module "zone_libtime" {
 # Create a zone
 #  - With delegation from the root zone above
 #  - With a wildcard certificate
-#  - With no cloned certificate in other regions 
+#  - With no cloned certificate in other regions
 module "zone_app" {
   source = "../.."
 
@@ -68,7 +68,7 @@ module "zone_app" {
   certificate = {
     enabled = true
 
-    domain_name = "*."
+    domain_name               = "*."
     subject_alternative_names = []
   }
 }

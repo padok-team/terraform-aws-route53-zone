@@ -6,14 +6,14 @@
 # ====================[ Default Certificate ] ===============
 
 locals {
-  certificate = defaults (
+  certificate = defaults(
     var.certificate,
     {
       enabled       = false
       enabled_clone = false
 
       domain_name = ""
-      # subject_alternative_names = 
+      # subject_alternative_names =
   })
 }
 
@@ -58,14 +58,14 @@ resource "aws_route53_record" "delegation" {
 # ====================[ Certificates ] =======================
 
 module "certificate" {
-  count  = local.certificate["enabled"] ? 1 : 0
+  count = local.certificate["enabled"] ? 1 : 0
 
   source = "./modules/terraform-aws-certificate"
 
   tags = var.tags
 
   certificate = local.certificate
-  zone        = {
+  zone = {
     name = local.zone_internal.name
     id   = local.zone_internal.zone_id
   }
@@ -74,7 +74,7 @@ module "certificate" {
 # Create a clone using another provider if required
 #  => Useful for example for CloudFront that require a certificate in us-east-1
 module "certificate_clone" {
-  count    = local.certificate["enabled_clone"] ? 1 : 0
+  count = local.certificate["enabled_clone"] ? 1 : 0
 
   source = "./modules/terraform-aws-certificate"
 
@@ -85,7 +85,7 @@ module "certificate_clone" {
   tags = var.tags
 
   certificate = local.certificate
-  zone        = {
+  zone = {
     name = local.zone_internal.name
     id   = local.zone_internal.zone_id
   }

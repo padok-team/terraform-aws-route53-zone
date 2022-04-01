@@ -25,11 +25,11 @@ provider "aws" {
 
 # Setup a root domain + a child domain
 locals {
-  domain_root = "libtime.forge-demo.fr"
+  domain_root = "libtime.XXX.fr"
   domains = {
-    for env in ["zone-staging", "zone-preproduction", "zone-production"]:
-      env => format("%s.%s", env, module.zone_root.zone["name"])
-    }
+    for env in ["zone-staging", "zone-preproduction", "zone-production"] :
+    env => format("%s.%s", env, module.zone_root.zone["name"])
+  }
 }
 
 # Create a certificate for the root zone
@@ -83,7 +83,7 @@ module "zone_staging" {
     enabled       = true
     enabled_clone = false
 
-    domain_name = ""
+    domain_name               = ""
     subject_alternative_names = ["*."]
   }
 }
@@ -109,7 +109,7 @@ module "zone_preproduction" {
     enabled       = true
     enabled_clone = false
 
-    domain_name = ""
+    domain_name               = ""
     subject_alternative_names = ["*."]
   }
 }
@@ -117,7 +117,7 @@ module "zone_preproduction" {
 # Create a zone
 #  - With delegation from the root zone above
 #  - With certificate with wildcard + zone apex SANs
-#  - With a cloned certificate in us-east-1 
+#  - With a cloned certificate in us-east-1
 module "zone_production" {
   source = "../.."
 
@@ -135,7 +135,7 @@ module "zone_production" {
     enabled       = true
     enabled_clone = true
 
-    domain_name = ""
+    domain_name               = ""
     subject_alternative_names = ["*."]
   }
 }
