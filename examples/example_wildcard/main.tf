@@ -3,18 +3,18 @@
 #    - NS records for delegation to the child zone
 #    - A certificate
 #
-#  - The other one it managed by Terraform,
+#  - The other one it managed by Terraform:
 #    - Therefore created by it
 #    - And will get a wildcard certificate
 #
-# Note: Certificates for the child zones, will stay disabled until you have performed zone delegation
+# Note: Certificates for the child zones will stay disabled until you have performed zone delegation
 
-# This example will use your local credentials + Paris region
+# This example will use your local credentials in Paris region
 provider "aws" {
   region = "eu-west-3"
 }
 
-# Setup a root domain + a child domain
+# Setup a root domain and a child domain
 locals {
   domain_root = "libtime.XXX.fr"
   domain      = format("zone-app.%s", local.domain_root)
@@ -22,8 +22,8 @@ locals {
 
 # Create a certificate for the root zone
 #  - Will not change anything in the root zone config
-#    Because it does not belong to this Terraform context,
-#    But it can add NS records to the zone to perform zone delegation
+#    because it does not belong to this Terraform context,
+#    but it can add NS records to the zone to perform zone delegation
 module "zone_libtime" {
   source = "../.."
 
@@ -73,7 +73,7 @@ module "zone_app" {
   }
 }
 
-# Test record: to check that your zone delegation from parent zone is working
+# Test record: to check that your zone delegation from the parent zone is working
 resource "aws_route53_record" "test" {
   zone_id = module.zone_app.zone.zone_id
   name    = format("test.%s", module.zone_app.zone.name)

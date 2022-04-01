@@ -10,11 +10,11 @@
 #
 # Child zones
 #   Create a certificate and a clone certficate,
-#     each with wildcard and zone apex coverage
+#   each with wildcard and zone apex coverage
 #
 # Note: Certificate should stay disabled until you have performed zone delegation
 
-# These example will use your local credentials + Paris region
+# These example will use your local credentials in Paris region
 provider "aws" {
   region = "eu-west-3"
 }
@@ -23,7 +23,7 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# Setup a root domain + a child domain
+# Setup a root domain and a child domain
 locals {
   domain_root = "libtime.XXX.fr"
   domains = {
@@ -32,10 +32,10 @@ locals {
   }
 }
 
-# Create a certificate for the root zone
+# Create a certificate for the root zone:
 #  - Will not change anything in the root zone config
-#    Because it does not belong to this Terraform context,
-#    But it can add NS records to the zone to perform zone delegation
+#    because it does not belong to this Terraform context,
+#    but it can add NS records to the zone to perform zone delegation
 module "zone_root" {
   source = "../.."
 
@@ -62,9 +62,9 @@ module "zone_root" {
   }
 }
 
-# Create a zone
+# Create a zone:
 #  - With delegation from the root zone above
-#  - With certificate with wildcard + zone apex SANs
+#  - With certificate with wildcard and zone apex SANs
 #  - Without cloned certificate
 module "zone_staging" {
   source = "../.."
@@ -88,9 +88,9 @@ module "zone_staging" {
   }
 }
 
-# Create a zone
+# Create a zone:
 #  - With delegation from the root zone above
-#  - With certificate with wildcard + zone apex SANs
+#  - With certificate with wildcard and zone apex SANs
 #  - Without cloned certificate
 module "zone_preproduction" {
   source = "../.."
@@ -114,7 +114,7 @@ module "zone_preproduction" {
   }
 }
 
-# Create a zone
+# Create a zone:
 #  - With delegation from the root zone above
 #  - With certificate with wildcard + zone apex SANs
 #  - With a cloned certificate in us-east-1

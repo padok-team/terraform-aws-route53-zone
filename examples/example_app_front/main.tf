@@ -2,7 +2,7 @@
 #
 # Note: Certificate should stay disabled until you have performed zone delegation
 
-# These example will use your local credentials + Paris region
+# These example will use your local credentials in Paris region
 provider "aws" {
   region = "eu-west-3"
 }
@@ -11,7 +11,7 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# Setup a root domain + a child domain
+# Setup a root domain and a child domain
 locals {
   domain_root = "libtime.XXX.fr"
   domain      = format("zone-app-front.%s", local.domain_root)
@@ -19,11 +19,11 @@ locals {
 
 # Create a certificate for the root zone
 #  - Will not change anything in the root zone config
-#    Because it does not belong to this Terraform context,
-#    But it can add NS records to the zone to perform zone delegation
+#    because it does not belong to this Terraform context,
+#    but it can add NS records to the zone to perform zone delegation
 #
 #  - Will create a certificate that will be validated
-#    using this zone + DNS challenge
+#    using this zone and DNS challenge
 module "zone_libtime" {
   source = "../.."
 
@@ -48,9 +48,9 @@ module "zone_libtime" {
   }
 }
 
-# Create a zone
+# Create a zone:
 #  - With delegation from the root zone above
-#  - With certificate with www. + zone apex SANs
+#  - With certificate with www. and zone apex SANs
 #  - With a cloned certificate in us-east-1
 module "zone_app_front" {
   source = "../.."
@@ -77,7 +77,7 @@ module "zone_app_front" {
 }
 
 
-# Test record: to check that your zone delegation from parent zone is working
+# Test record: to check that your zone delegation from the parent zone is working
 resource "aws_route53_record" "test" {
   zone_id = module.zone_app_front.zone.zone_id
   name    = format("test.%s", module.zone_app_front.zone.name)
