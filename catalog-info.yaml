@@ -1,0 +1,19 @@
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: terraform-aws-route53-zone
+  description: >
+    Terraform module which creates Route53 public zones and ACM
+    Certificates resources on AWS.
+  tags:
+    - "terraform"
+    - "aws"
+  annotations:
+    github.com/project-slug: padok-team/terraform-aws-route53-zone
+    backstage.io/techdocs-ref: dir:.
+spec:
+  type: module
+  system: terraform
+  owner: library-aws
+  lifecycle: awaiting-feedback

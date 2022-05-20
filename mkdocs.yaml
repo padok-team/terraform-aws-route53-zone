@@ -1,0 +1,8 @@
+---
+site_name: terraform-aws-route53-zone
+
+repo_name: padok-team/terraform-aws-route53-zone
+repo_url: https://github.com/padok-team/terraform-aws-route53-zone
+
+plugins:
+  - techdocs-core
