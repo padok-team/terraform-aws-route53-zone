@@ -3,11 +3,8 @@ terraform {
 
   required_providers {
     aws = {
-      source                = "hashicorp/aws"
-      version               = ">= 3.63"
-      configuration_aliases = [aws.clone]
+      source  = "hashicorp/aws"
+      version = ">= 4, < 5"
     }
   }
-
-  experiments = [module_variable_optional_attrs]
 }
