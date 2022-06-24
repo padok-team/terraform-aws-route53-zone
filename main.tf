@@ -1,92 +1,17 @@
-# Create
-#  - 1 Route53 zone
-#  - 1 ACM certificate, with DNS validation, if enabled
-
-
-# ====================[ Default Certificate ] ===============
-
-locals {
-  certificate = defaults(
-    var.certificate,
-    {
-      enabled       = false
-      enabled_clone = false
-
-      domain_name = ""
-      # subject_alternative_names =
-  })
-}
-
-
-# ====================[ Route53 zone ] ======================
-
+# create the zone
 resource "aws_route53_zone" "this" {
-  count = var.zone["create"] ? 1 : 0
-
-  name = var.zone["name"]
-  tags = var.tags
+  name = var.name
 }
 
-# Use data source only when we do not want to create the zone, but reuse another one
-data "aws_route53_zone" "this" {
-  count = var.zone["create"] ? 0 : 1
-
-  name         = var.zone["name"]
-  private_zone = false
-}
-
-locals {
-  zone_internal = var.zone["create"] ? aws_route53_zone.this[0] : data.aws_route53_zone.this[0]
-}
-
-
-# ====================[ Route53 zone delegation ] ===========
-
+# if root provided, set NS records to the root zone
 resource "aws_route53_record" "delegation" {
-  for_each = var.delegations
+  count = var.declare_ns_records ? 1 : 0
 
-  zone_id = local.zone_internal.zone_id
-  name    = each.key
+  zone_id = var.root_zone_id
+  name    = var.name
 
   type = "NS"
   ttl  = "300"
 
-  records = each.value
-}
-
-
-# ====================[ Certificates ] =======================
-
-module "certificate" {
-  count = local.certificate["enabled"] ? 1 : 0
-
-  source = "./modules/terraform-aws-certificate"
-
-  tags = var.tags
-
-  certificate = local.certificate
-  zone = {
-    name = local.zone_internal.name
-    id   = local.zone_internal.zone_id
-  }
-}
-
-# Create a clone using another provider if required
-#  => Useful for example for CloudFront that require a certificate in us-east-1
-module "certificate_clone" {
-  count = local.certificate["enabled_clone"] ? 1 : 0
-
-  source = "./modules/terraform-aws-certificate"
-
-  providers = {
-    aws = aws.clone
-  }
-
-  tags = var.tags
-
-  certificate = local.certificate
-  zone = {
-    name = local.zone_internal.name
-    id   = local.zone_internal.zone_id
-  }
+  records = aws_route53_zone.this.name_servers
 }

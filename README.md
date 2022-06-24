@@ -1,136 +1,78 @@
 # AWS Route53 Zone and ACM Terraform module
 
-Terraform module which creates **Route53 public zones** and **ACM Certificates** resources on **AWS**.
+Terraform module which creates **Route53 public zones** resources on **AWS**.
 
 ## User Stories for this module
 
 - AAOps I can create a new Route53 zone
 - AAOps I can add a delegation record to a zone
-- AAOps I can create a certificate for a zone
-- AAOps I can create a cloned certificate in another region
 
 ## Usage
 
 ```hcl
-# 2 zones:
-#  - 1 is managed outside of Terraform, and will just get
-#    - NS records for delegation to the child zone
-#    - A certificate
-#
-#  - The other one it managed by Terraform:
-#    - Therefore created by it
-#    - And will get a wildcard certificate
-#
-# Note: Certificates for the child zones will stay disabled until you have performed zone delegation
+terraform {
+  required_version = ">= 1.1.0"
 
-# This example will use your local credentials in Paris region
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 3.63"
+    }
+  }
+}
+
 provider "aws" {
+  region = local.region
+
+  default_tags {
+    tags = {
+      Env         = local.env
+      Region      = local.region
+      OwnedBy     = "Padok"
+      ManagedByTF = true
+    }
+  }
+}
+
+# some variables to make life easier
+locals {
+  env    = "test"
   region = "eu-west-3"
 }
 
-# Setup a root domain and a child domain
-locals {
-  domain_root = "libtime.XXX.fr"
-  domain      = format("zone-app.%s", local.domain_root)
-}
-
-# Create a certificate for the root zone
-#  - Will not change anything in the root zone config
-#    because it does not belong to this Terraform context,
-#    but it can add NS records to the zone to perform zone delegation
-module "zone_libtime" {
+# Root domain
+module "my_zone" {
   source = "../.."
 
-  providers = {
-    aws       = aws
-    aws.clone = aws
-  }
-
-  zone = {
-    create = false
-    name   = local.domain_root
-  }
-
-  certificate = {
-    enabled = false
-
-    domain_name = ""
-  }
-
-  delegations = {
-    "zone-app" = module.zone_app.zone.name_servers
-  }
-}
-
-# Create a zone
-#  - With delegation from the root zone above
-#  - With a wildcard certificate
-#  - With no cloned certificate in other regions
-module "zone_app" {
-  source = "../.."
-
-  providers = {
-    aws       = aws
-    aws.clone = aws
-  }
-
-  zone = {
-    create = true
-    name   = local.domain
-  }
-
-  certificate = {
-    enabled = true
-
-    domain_name               = "*."
-    subject_alternative_names = []
-  }
-}
-
-# Test record: to check that your zone delegation from the parent zone is working
-resource "aws_route53_record" "test" {
-  zone_id = module.zone_app.zone.zone_id
-  name    = format("test.%s", module.zone_app.zone.name)
-  type    = "A"
-  ttl     = "300"
-  records = ["127.0.0.1"]
+  name = "my_zone.libtime.forge-demo.fr"
 }
 ```
 
-## Schema
-
-![Schema DNS](./img/schema.png)
-
 ## Examples
 
-- [Example with a root zone with 1 certificate and a child zone with 2 certificates in differents regions](examples/example_app_front/main.tf)
-- [Example with 1 existing root zone and 2 sub zones](examples/example_multi_zones/main.tf)
-- [Example with 1 child zone and a wildcard certificate](examples/example_wildcard/main.tf)
+- [Example with a simple zone](examples/simple_zone/main.tf)
+- [Example with a root zone and 2 childs zone](examples/multi_zone/main.tf)
 
 <!-- BEGIN_TF_DOCS -->
+
 ## Modules
 
-| Name | Source | Version |
-|------|--------|---------|
-| <a name="module_certificate"></a> [certificate](#module\_certificate) | ./modules/terraform-aws-certificate | n/a |
-| <a name="module_certificate_clone"></a> [certificate\_clone](#module\_certificate\_clone) | ./modules/terraform-aws-certificate | n/a |
+No modules.
 
 ## Inputs
 
-| Name | Description | Type | Default | Required |
-|------|-------------|------|---------|:--------:|
-| <a name="input_certificate"></a> [certificate](#input\_certificate) | Certificate to be created for the zone. Domain and sans should end with a "." and exclude the zone name. | <pre>object({<br>    enabled                   = optional(bool)<br>    enabled_clone             = optional(bool)<br>    domain_name               = string<br>    subject_alternative_names = optional(list(string))<br>  })</pre> | `null` | no |
-| <a name="input_delegations"></a> [delegations](#input\_delegations) | Map { <sub\_zone> => [<name\_servers>] in order to setup delegations. For <sub\_zones> just put the sub domain. | `map(list(string))` | `{}` | no |
-| <a name="input_tags"></a> [tags](#input\_tags) | Tags that will be added to resources in the module that support it | `map(string)` | `{}` | no |
-| <a name="input_zone"></a> [zone](#input\_zone) | DNS name of the zone (e.g. exemple.com). | <pre>object({<br>    create = optional(bool)<br>    name   = string<br>  })</pre> | `null` | no |
+| Name                                                                                    | Description                                                          | Type     | Default | Required |
+| --------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | -------- | ------- | :------: |
+| <a name="input_declare_ns_records"></a> [declare_ns_records](#input_declare_ns_records) | Whether to declare NS records for the created zone                   | `bool`   | `false` |    no    |
+| <a name="input_name"></a> [name](#input_name)                                           | DNS name of the zone (e.g. exemple.com).                             | `string` | `null`  |    no    |
+| <a name="input_root_zone_id"></a> [root_zone_id](#input_root_zone_id)                   | Route53 zone ID of root domain to add NS record for the created zone | `string` | `null`  |    no    |
 
 ## Outputs
 
-| Name | Description |
-|------|-------------|
-| <a name="output_certificate"></a> [certificate](#output\_certificate) | Objects describing the certificate with: arn and domain\_name |
-| <a name="output_certificate_clone"></a> [certificate\_clone](#output\_certificate\_clone) | Objects describing the clone certificate with: arn and domain\_name |
-| <a name="output_zone"></a> [zone](#output\_zone) | Objects describing the zone with: name, arn, zone\_id and name servers |
+| Name                                            | Description                                                           |
+| ----------------------------------------------- | --------------------------------------------------------------------- |
+| <a name="output_this"></a> [this](#output_this) | Objects describing the zone with: name, arn, zone_id and name servers |
+
 <!-- END_TF_DOCS -->
 
 ## License
