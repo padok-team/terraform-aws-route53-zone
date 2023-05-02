@@ -1,6 +1,8 @@
 # create the zone
 resource "aws_route53_zone" "this" {
   name = var.name
+
+  force_destroy = var.force_destroy
 }
 
 # if root provided, set NS records to the root zone
