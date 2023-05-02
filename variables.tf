@@ -5,6 +5,12 @@ variable "name" {
   default     = null
 }
 
+variable "force_destroy" {
+  description = " (Optional) Whether to destroy all records (possibly managed outside of Terraform) in the zone when destroying the zone."
+  type        = bool
+  default     = false
+}
+
 variable "declare_ns_records" {
   description = "Whether to declare NS records for the created zone"
   type        = bool
@@ -16,4 +22,3 @@ variable "root_zone_id" {
   type        = string
   default     = null
 }
-
